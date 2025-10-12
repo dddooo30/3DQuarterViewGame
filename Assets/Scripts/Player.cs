@@ -36,6 +36,7 @@ public class Player : MonoBehaviour
     bool isSwap;
     bool isFireReady = true;
     bool isReload;
+    bool isBorder;
 
     bool sDown1;
     bool sDown2;
@@ -90,9 +91,12 @@ public class Player : MonoBehaviour
         moveVec = new Vector3(hAxis, 0, vAxis).normalized; //normalized: 방향값이 1로 보정된 벡터 
 
         if (isdodge) moveVec = dodgeVec;
+        
         if (isSwap || !isFireReady || isReload) moveVec = Vector3.zero;
-        transform.position += moveVec * speed * (wDown ? 0.3f : 1f) * Time.deltaTime; // 삼항연산자 yes면 앞에 값 아니면 뒤에 값
-
+        
+        if (!isBorder) {
+            transform.position += moveVec * speed * (wDown ? 0.3f : 1f) * Time.deltaTime; // 삼항연산자 yes면 앞에 값 아니면 뒤에 값
+        }
         anim.SetBool("isrun", moveVec != Vector3.zero);
         anim.SetBool("iswalk", wDown);
     }
@@ -226,6 +230,22 @@ public class Player : MonoBehaviour
         }
     }
 
+    void FreezeRotation()
+    {
+        rb.angularVelocity = Vector3.zero;
+    }
+
+    void StoptoWall()
+    {
+        Debug.DrawRay(transform.position, transform.forward * 2, Color.green);
+        isBorder = Physics.Raycast(transform.position, transform.forward, 5, LayerMask.GetMask("Wall"));
+    }
+
+    void FixedUpdate()
+    {
+        FreezeRotation();
+        StoptoWall();
+    }
     void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Floor")

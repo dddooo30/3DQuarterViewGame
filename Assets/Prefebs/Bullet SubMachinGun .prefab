@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 53549101352776345}
   - component: {fileID: 7325211003539133210}
   - component: {fileID: 3098481031677150039}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: 'Bullet SubMachinGun '
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -196,7 +196,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3

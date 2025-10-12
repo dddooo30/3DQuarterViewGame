@@ -35,7 +35,7 @@ public class Weapon : MonoBehaviour
     IEnumerator Swing() // 열거형 함수 클래스 yield가 반드시 들어가야함
     {
         //1
-        yield return new WaitForSeconds(0.1f);// 0.1초 대기 new null -> 1프레임씩 대기
+        yield return new WaitForSeconds(0.4f);// 0.1초 대기 new null -> 1프레임씩 대기
         meleeArea.enabled = true;
         trailEffect.enabled = true;
         //2 
