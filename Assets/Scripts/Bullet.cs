@@ -3,10 +3,12 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public int damage;
+    public bool isMelee;
+    public bool isRock;
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag == "Floor")
+        if(!isRock && collision.gameObject.tag == "Floor")
         {
             Destroy(gameObject, 3);
         } 
@@ -14,9 +16,9 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Wall")
+        if (!isMelee && other.gameObject.tag == "Wall")
         {
-            Debug.Log("ÃÑ¾Ë »ç¶óÁü");
+            
             Destroy(gameObject);
         }
     }

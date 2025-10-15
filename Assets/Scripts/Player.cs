@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
     bool isFireReady = true;
     bool isReload;
     bool isBorder;
+    bool isDamage;
 
     bool sDown1;
     bool sDown2;
@@ -49,6 +50,7 @@ public class Player : MonoBehaviour
 
     Animator anim;
     Rigidbody rb;
+    MeshRenderer[] meshs;
 
     GameObject nearObject;
     Weapon equipWeapon;
@@ -57,8 +59,9 @@ public class Player : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        anim = GetComponentInChildren<Animator>(); // animator 오브젝트를 자식으로 넣었기 때문에 
-    }                                              // GetComponentInChildren 사용
+        anim = GetComponentInChildren<Animator>();// animator 오브젝트를 자식으로 넣었기 때문에  // GetComponentInChildren 사용
+        meshs = GetComponentsInChildren<MeshRenderer>();                                        
+    }                                              
 
     // Update is called once per frame
     void Update()
@@ -275,6 +278,7 @@ public class Player : MonoBehaviour
         FreezeRotation();
         StoptoWall();
     }
+
     void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Floor")
@@ -310,10 +314,45 @@ public class Player : MonoBehaviour
                     break;
             }
             Destroy(other.gameObject);  
+        } else if (other.tag == "EnemyBullet")
+        {
+            if (!isDamage) 
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                health -= enemyBullet.damage;
+
+                bool isBossAtk = other.name == "Boss Melle Area";
+                StartCoroutine(OnDamage(isBossAtk));
+            }
+
+            if (other.GetComponent<Rigidbody>() != null)
+                Destroy(other.gameObject);
+
         }
 
         
     }
+
+    IEnumerator OnDamage(bool isBossAtk)
+    {
+        isDamage = true;
+        foreach(MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.yellow;
+        }
+        if (isBossAtk) rb.AddForce(transform.forward * -25, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(1f);
+
+        isDamage = false;
+        foreach (MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.white;
+        }
+
+        if (isBossAtk) rb.linearVelocity = Vector3.zero;
+    }
+
     void OnTriggerStay(Collider other)
     {
         if (other.tag == "Weapon")

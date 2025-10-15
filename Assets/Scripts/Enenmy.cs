@@ -4,31 +4,42 @@ using UnityEngine.AI;
 
 public class Enenmy : MonoBehaviour
 {
+    public enum Type { A, B, C, D};
+    public Type enemytype;
     public int maxHealth;
     public int curHealth;
     public Transform target;
+    public BoxCollider meleeArea;
     public bool isChase;
+    public bool isAttack;
+    public bool isDead;
+    public GameObject bullet;
 
-    Rigidbody rb;
-    BoxCollider boxCollider;
-    Material mat;
-    NavMeshAgent nav;
-    Animator anim;
+    public Rigidbody rb;
+    public BoxCollider boxCollider;
+    public MeshRenderer[] meshs;
+    public NavMeshAgent nav;
+    public Animator anim;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         boxCollider = GetComponent<BoxCollider>();
-        mat = GetComponentInChildren<MeshRenderer>().material;
+        meshs = GetComponentsInChildren<MeshRenderer>();
         nav = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
 
-        Invoke("ChaseStart", 2);
+        if(enemytype != Type.D) Invoke("ChaseStart", 2);
     }
 
     void Update()
     {
-        if(isChase) nav.SetDestination(target.position);
+        if(nav.enabled && enemytype != Type.D)
+        {
+            nav.SetDestination(target.position);
+            nav.isStopped = !isChase;
+        } 
+            
     }
 
     void ChaseStart()
@@ -40,6 +51,7 @@ public class Enenmy : MonoBehaviour
     void FixedUpdate()
     {
         FreezeVelcocity();
+        Targerting();
     }
 
     void FreezeVelcocity()
@@ -49,6 +61,42 @@ public class Enenmy : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
             rb.linearVelocity = Vector3.zero;
         }   
+    }
+
+    void Targerting()
+    {
+        if(!isDead && enemytype != Type.D)
+        {
+            float targetRadius = 1.5f;
+            float targetRange = 3f;
+
+            switch (enemytype)
+            {
+                case Type.A:
+                    targetRadius = 1.5f;
+                    targetRange = 3f;
+                    break;
+                case Type.B:
+                    targetRadius = 1f;
+                    targetRange = 12f;
+                    break;
+                case Type.C:
+                    targetRadius = 0.5f;
+                    targetRange = 25f;
+                    break;
+            }
+
+            RaycastHit[] rayHits = Physics.SphereCastAll(transform.position, targetRadius,
+                                transform.forward, targetRange, LayerMask.GetMask("Player"));
+
+            if (rayHits.Length > 0 && !isAttack)
+            {
+                StartCoroutine(Attack());
+            }
+        }
+       
+
+
     }
 
     void OnTriggerEnter(Collider other)
@@ -84,17 +132,22 @@ public class Enenmy : MonoBehaviour
 
     IEnumerator OnDamage(Vector3 reactVec, bool isGrenade)
     {
-        mat.color = Color.red;
+        foreach(MeshRenderer mesh in meshs)
+        mesh.material.color = Color.red;
         yield return new WaitForSeconds(0.1f);
 
         if (curHealth > 0)
         {
-            mat.color = Color.white;
+            foreach (MeshRenderer mesh in meshs)
+                mesh.material.color = Color.white;
         }
         else {
 
-            mat.color = Color.gray;
+            foreach (MeshRenderer mesh in meshs)
+                mesh.material.color = Color.gray;
+
             gameObject.layer = 12;
+            isDead = true;
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
@@ -113,8 +166,54 @@ public class Enenmy : MonoBehaviour
                 reactVec += Vector3.up;
                 rb.AddForce(reactVec * 5, ForceMode.Impulse);
             }
-                
+            if(enemytype != Type.D)
             Destroy(gameObject, 4);
         }
+    }
+
+    IEnumerator Attack()
+    {
+        isChase = false;
+        isAttack = true;
+        anim.SetBool("isAttack", true);
+
+        switch (enemytype)
+        {
+            case Type.A: //근접 일반
+                yield return new WaitForSeconds(0.2f);
+                meleeArea.enabled = true;
+
+                yield return new WaitForSeconds(1f);
+                meleeArea.enabled = false;
+
+                yield return new WaitForSeconds(1f);
+                break;
+
+            case Type.B: //근접 빠름
+                yield return new WaitForSeconds(0.1f);
+                rb.AddForce(transform.forward * 20, ForceMode.Impulse);
+                meleeArea.enabled = true;
+
+                yield return new WaitForSeconds(0.5f);
+                rb.linearVelocity = Vector3.zero;
+                meleeArea.enabled = false;
+
+                yield return new WaitForSeconds(2f);
+                break;
+
+            case Type.C: //원거리
+                yield return new WaitForSeconds(0.5f);
+                GameObject instantBullet = Instantiate(bullet, transform.position, transform.rotation);
+                Rigidbody rbbulet = instantBullet.GetComponent<Rigidbody>();
+                rbbulet.linearVelocity = transform.forward * 20;
+
+                yield return new WaitForSeconds(2f);
+                break;
+        }
+       
+
+        isChase = true;
+        isAttack = false;
+        anim.SetBool("isAttack", false);
     }
 }

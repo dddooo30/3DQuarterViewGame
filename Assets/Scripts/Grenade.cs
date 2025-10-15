@@ -23,8 +23,8 @@ public class Grenade : MonoBehaviour
         effectObj.SetActive(true);
 
         RaycastHit[] rayHits = Physics.SphereCastAll(transform.position, 15, 
-                            Vector3.up, 0f, LayerMask.GetMask("Enemy"));
-
+                            Vector3.up, 0f, LayerMask.GetMask("Enemy")); // Raycast를 배열로 사용하는 이유
+                                                                         // 폭탄은 여러개가 나가기 때문에
          
         foreach(RaycastHit hitObj in rayHits)
         {
