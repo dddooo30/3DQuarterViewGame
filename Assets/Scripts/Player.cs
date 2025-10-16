@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     public int ammo;
     public int coin;
     public int health;
+    public int score;
     
     public int maxAmmo;
     public int maxCoin;
@@ -40,6 +41,7 @@ public class Player : MonoBehaviour
     bool isReload;
     bool isBorder;
     bool isDamage;
+    bool isShop;
 
     bool sDown1;
     bool sDown2;
@@ -53,14 +55,17 @@ public class Player : MonoBehaviour
     MeshRenderer[] meshs;
 
     GameObject nearObject;
-    Weapon equipWeapon;
+    public Weapon equipWeapon;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();// animator 오브젝트를 자식으로 넣었기 때문에  // GetComponentInChildren 사용
-        meshs = GetComponentsInChildren<MeshRenderer>();                                        
+        meshs = GetComponentsInChildren<MeshRenderer>();
+
+        Debug.Log(PlayerPrefs.GetInt("MaxScore"));
+        //PlayerPrefs.SetInt("MaxScore", 112500);
     }                                              
 
     // Update is called once per frame
@@ -128,7 +133,7 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if(jDown && moveVec == Vector3.zero && !isjump && !isdodge && !isSwap)
+        if(jDown && moveVec == Vector3.zero && !isjump && !isdodge && !isSwap && !isShop)
         {
             rb.AddForce(Vector3.up * 15, ForceMode.Impulse);
             anim.SetBool("isjump", true);
@@ -141,7 +146,7 @@ public class Player : MonoBehaviour
     {
         if (hasGrenades == 0) return;
 
-        if(gDown && !isReload && !isSwap)
+        if(gDown && !isReload && !isSwap && !isShop)
         {
             Ray ray = followCamer.ScreenPointToRay(Input.mousePosition);
             RaycastHit rayHit;
@@ -168,7 +173,7 @@ public class Player : MonoBehaviour
         fireDelay += Time.deltaTime;
         isFireReady = equipWeapon.rate < fireDelay;
 
-        if(fDown && isFireReady && !isdodge && !isSwap)
+        if(fDown && isFireReady && !isdodge && !isSwap && !isShop)
         {
             equipWeapon.Use();
             anim.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
@@ -182,7 +187,7 @@ public class Player : MonoBehaviour
         if (equipWeapon.type == Weapon.Type.Melee) return;
         if (ammo == 0) return;
         
-        if (rDown && !isjump && !isdodge && !isSwap && isFireReady)
+        if (rDown && !isjump && !isdodge && !isSwap && isFireReady && !isShop)
         {
             anim.SetTrigger("doReload");
             isReload = true;
@@ -201,7 +206,7 @@ public class Player : MonoBehaviour
 
     void Dodge()
     {
-        if (jDown && moveVec != Vector3.zero && !isjump && !isSwap)
+        if (jDown && moveVec != Vector3.zero && !isjump && !isSwap && !isShop)
         {
             dodgeVec = moveVec;
             speed *= 2;
@@ -237,7 +242,7 @@ public class Player : MonoBehaviour
         if (sDown2) weaponIndex = 1;
         if (sDown3) weaponIndex = 2;
 
-        if ((sDown1 || sDown2 || sDown3) && !isjump && !isdodge )
+        if ((sDown1 || sDown2 || sDown3) && !isjump && !isdodge && !isShop )
         {
             if(equipWeapon != null) equipWeapon.gameObject.SetActive(false);
             equipWeaponsIndex = weaponIndex;
@@ -259,7 +264,12 @@ public class Player : MonoBehaviour
                 hasWeapons[weaponIndex] = true;
            
                 Destroy(nearObject);
-        }
+        }else if(nearObject.tag == "Shop")
+            {
+                Shop shop = nearObject.GetComponent<Shop>();
+                shop.Enter(this);  
+                isShop = true;
+            }
     }
 
     void FreezeRotation()
@@ -355,17 +365,25 @@ public class Player : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Weapon")
+        if (other.tag == "Weapon" || other.tag == "Shop") 
+        {
             nearObject = other.gameObject;
-        if (other.tag != "Weapon")
-            nearObject = other.gameObject;
-
-        Debug.Log(nearObject.name);
+        }
+            
+        
     }
 
     void OnTriggerExit(Collider other)
     {
         if (other.tag == "Weapon")
             nearObject = null;
+
+        else if(other.tag == "Shop")
+        {
+            Shop shop = nearObject.GetComponent<Shop>();
+            shop.Exit();
+            isShop = false;
+            nearObject = null;
+        }
     }
 }

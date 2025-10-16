@@ -8,12 +8,15 @@ public class Enenmy : MonoBehaviour
     public Type enemytype;
     public int maxHealth;
     public int curHealth;
+    public int score;
+    public GameManager manager;
     public Transform target;
     public BoxCollider meleeArea;
     public bool isChase;
     public bool isAttack;
     public bool isDead;
     public GameObject bullet;
+    public GameObject[] coins;
 
     public Rigidbody rb;
     public BoxCollider boxCollider;
@@ -151,6 +154,27 @@ public class Enenmy : MonoBehaviour
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
+            Player player = target.GetComponent<Player>();
+            player.score += score;
+            int ranCoin = Random.Range(0, 3);
+            Instantiate(coins[ranCoin], transform.position, Quaternion.identity);
+
+            switch(enemytype)
+            {
+                case Type.A:
+                    manager.enemyCntA --; 
+                    break;
+                case Type.B:
+                    manager.enemyCntB --;
+                    break;
+                case Type.C:
+                    manager.enemyCntC --;
+                    break;
+                case Type.D:
+                    manager.enemyCntD --;
+                    break;
+            }
+
             if (isGrenade) 
             {
                 reactVec = reactVec.normalized;
@@ -166,7 +190,7 @@ public class Enenmy : MonoBehaviour
                 reactVec += Vector3.up;
                 rb.AddForce(reactVec * 5, ForceMode.Impulse);
             }
-            if(enemytype != Type.D)
+            
             Destroy(gameObject, 4);
         }
     }
