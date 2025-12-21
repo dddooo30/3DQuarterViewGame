@@ -98,8 +98,6 @@ public class Enenmy : MonoBehaviour
             }
         }
        
-
-
     }
 
     void OnTriggerEnter(Collider other)

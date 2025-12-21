@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject menuPanel;
     public GameObject gamePanel;
+    public GameObject overPanel;
     public Text maxScoreTXT;
     public Text scoreTXT;
     public Text stageTXT;
@@ -37,6 +39,8 @@ public class GameManager : MonoBehaviour
     public Text enemyATXT;
     public Text enemyBTXT;
     public Text enemyCTXT;
+    public Text curScoreCTXT;
+    public Text bestTXT;
 
     public Image weapon1IMG;
     public Image weapon2IMG;
@@ -50,6 +54,9 @@ public class GameManager : MonoBehaviour
     {
         enemyList = new List<int>();
         maxScoreTXT.text = string.Format("{0:n0}", PlayerPrefs.GetInt("MaxScore")) ;
+
+        if (PlayerPrefs.HasKey("MaxScore"))
+            PlayerPrefs.SetInt("MaxScore", 0);
     }
 
     public void GameStart()
@@ -61,6 +68,26 @@ public class GameManager : MonoBehaviour
         gamePanel.SetActive(true);
 
         player.gameObject.SetActive(true);
+    }
+
+    public void GameOver()
+    {
+        gamePanel.SetActive(false);
+        overPanel.SetActive(true);
+        curScoreCTXT.text = scoreTXT.text;
+
+        int maxScore = PlayerPrefs.GetInt("MaxScore");
+        if (player.score > maxScore)
+        {
+            bestTXT.gameObject.SetActive(true);
+            PlayerPrefs.SetInt("MaxScore", player.score);
+        }
+        
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(0);
     }
 
     public void StageStart()
