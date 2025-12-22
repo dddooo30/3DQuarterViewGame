@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     {
         enemyList = new List<int>();
         maxScoreTXT.text = string.Format("{0:n0}", PlayerPrefs.GetInt("MaxScore")) ;
-
+        Debug.Log(maxScoreTXT.text) ;
         if (PlayerPrefs.HasKey("MaxScore"))
             PlayerPrefs.SetInt("MaxScore", 0);
     }
@@ -77,12 +77,13 @@ public class GameManager : MonoBehaviour
         curScoreCTXT.text = scoreTXT.text;
 
         int maxScore = PlayerPrefs.GetInt("MaxScore");
-        if (player.score > maxScore)
-        {
+
+        if (player.score > maxScore) {
             bestTXT.gameObject.SetActive(true);
             PlayerPrefs.SetInt("MaxScore", player.score);
+            Debug.Log(maxScoreTXT.text);
         }
-        
+            
     }
 
     public void Restart()

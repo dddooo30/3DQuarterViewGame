@@ -5083,7 +5083,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Item
   type: 1
-  value: 25
+  value: 500
 --- !u!1 &8774435077273334282
 GameObject:
   m_ObjectHideFlags: 0

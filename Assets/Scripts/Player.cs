@@ -85,6 +85,15 @@ public class Player : MonoBehaviour
         Dodge();
         Swap();
         interaction();
+        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            
+            Application.Quit();
+
+            
+            Debug.Log("ESC 키가 눌렸습니다. 빌드된 앱에서만 종료됩니다.");
+        }
     }
 
     void GetInput()
